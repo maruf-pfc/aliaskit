@@ -27,7 +27,7 @@ function print_color() {
 }
 
 function show_main_help() {
-    print_color "cyan" "🚀 Aliaskit - Command Line Superpowers"
+    print_color "cyan" "🚀 Aliaskit v1.0.0 - Command Line Superpowers"
     echo ""
     print_color "bold" "Usage:"
     echo "  ak <command> [args]"
@@ -175,6 +175,9 @@ case "$COMMAND" in
         ;;
     stats)
         bash "${AK_ROOT}/core/stats.sh"
+        ;;
+    version)
+        print_color "cyan" "Aliaskit v1.0.0"
         ;;
     *)
         if [[ "$COMMAND" == "help.sh" ]]; then

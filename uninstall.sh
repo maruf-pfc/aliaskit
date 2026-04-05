@@ -13,8 +13,8 @@ echo "Uninstalling Aliaskit..."
 if grep -q "Aliaskit Initialization" "$BASHRC"; then
     # We use sed to remove the block
     # Removing the lines
-    sed -i '/# Aliaskit Initialization/d' "$BASHRC"
-    sed -i "\\|source ${INSTALL_DIR}/core/init.sh|d" "$BASHRC"
+    sed --follow-symlinks -i '/# Aliaskit Initialization/d' "$BASHRC"
+    sed --follow-symlinks -i "\\|source ${INSTALL_DIR}/core/init.sh|d" "$BASHRC"
     echo "Removed aliaskit from $BASHRC"
 fi
 
