@@ -6,13 +6,13 @@
 # @desc  Refresh package lists from all repositories (and check aliaskit updates)
 # @usage update
 # @example update
-alias update='sudo apt update && ak update --auto'
+alias update='sudo apt update'
 
 ## upgrade
 # @desc  Update package lists and upgrade all installed packages
 # @usage upgrade
 # @example upgrade
-alias upgrade='sudo apt update && ak update --auto && sudo apt upgrade -y'
+alias upgrade='sudo apt update && sudo apt upgrade -y'
 
 ## full-upgrade
 # @desc  Full system upgrade including dependency resolution, then clean up

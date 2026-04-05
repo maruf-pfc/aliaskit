@@ -36,6 +36,19 @@ if [[ ! -f "${HOME}/.aliaskit.conf" ]]; then
     echo "Created default configuration."
 fi
 
+# 4. Setup APT Auto-Update hook
+if [[ -d "/etc/apt/apt.conf.d" ]]; then
+    echo -e "\nWould you like to enable the APT auto-update hook?"
+    echo "This checks for Aliaskit updates whenever you manually run 'sudo apt update'."
+    read -p "Enable APT hook? (Requires sudo pass) [y/N]: " enable_apt
+    if [[ "$enable_apt" =~ ^[yY] ]]; then
+        cat <<EOF | sudo bash -c "cat > /etc/apt/apt.conf.d/99aliaskit"
+APT::Update::Post-Invoke { "su -c 'bash ${INSTALL_DIR}/update.sh --auto' - $USER || true"; };
+EOF
+        echo "APT hook installed successfully!"
+    fi
+fi
+
 echo -e "\n\033[32m✔ Installation complete!\033[0m"
 echo -e "Please run \033[36msource ~/.bashrc\033[0m to start using aliaskit."
 echo -e "Type \033[33mak help\033[0m to see available commands."

@@ -27,7 +27,16 @@ if [[ -f "${HOME}/.aliaskit.conf" ]]; then
     fi
 fi
 
-# 3. Remove directory structure
+# 3. Remove APT Hook
+if [[ -f "/etc/apt/apt.conf.d/99aliaskit" ]]; then
+    read -p "Do you want to remove the APT auto-update hook? (Requires sudo) [y/N]: " rm_apt
+    if [[ "$rm_apt" =~ ^[yY] ]]; then
+        sudo rm -f "/etc/apt/apt.conf.d/99aliaskit"
+        echo "APT hook removed."
+    fi
+fi
+
+# 4. Remove directory structure
 if [[ -d "$INSTALL_DIR" ]]; then
     read -p "Do you want to delete the installation directory ($INSTALL_DIR)? (y/N): " response
     if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then

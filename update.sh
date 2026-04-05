@@ -26,7 +26,7 @@ check_and_update() {
     if [[ "$LOCAL" != "$REMOTE" ]]; then
         if [[ $AUTO_MODE -eq 1 ]]; then
             echo -e "\n\033[33m🚀 A new version of Aliaskit is available!\033[0m"
-            read -p "Do you want to update now? (y/N): " response
+            read -p "Do you want to update now? (y/N): " response < /dev/tty || response="N"
             if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
                 git pull
                 echo -e "\033[32m✔ Aliaskit updated successfully.\033[0m"
