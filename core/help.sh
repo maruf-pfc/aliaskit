@@ -52,8 +52,10 @@ function show_main_help() {
 function show_modules() {
     for module_file in "${AK_ROOT}/modules/"*.sh; do
         if [[ -f "$module_file" ]]; then
-            local category=$(grep -m 1 "# CATEGORY:" "$module_file" | sed 's/# CATEGORY: //')
-            local module_name=$(basename "$module_file" | sed -E 's/^[0-9]+_//' | sed 's/\.sh$//')
+            local category
+            category=$(grep -m 1 "# CATEGORY:" "$module_file" | sed 's/# CATEGORY: //')
+            local module_name
+            module_name=$(basename "$module_file" | sed -E 's/^[0-9]+_//' | sed 's/\.sh$//')
             printf "  %-15s - %s\n" "$module_name" "${category:-Uncategorized}"
         fi
     done
@@ -64,10 +66,12 @@ function show_module_help() {
     local found=0
     
     for module_file in "${AK_ROOT}/modules/"*.sh; do
-        local module_name=$(basename "$module_file" | sed -E 's/^[0-9]+_//' | sed 's/\.sh$//')
+        local module_name
+        module_name=$(basename "$module_file" | sed -E 's/^[0-9]+_//' | sed 's/\.sh$//')
         if [[ "$module_name" == "$target_module" ]]; then
             found=1
-            local category=$(grep -m 1 "# CATEGORY:" "$module_file" | sed 's/# CATEGORY: //')
+            local category
+            category=$(grep -m 1 "# CATEGORY:" "$module_file" | sed 's/# CATEGORY: //')
             print_color "cyan" "📦 Module: $module_name ($category)"
             echo "---------------------------------------------------"
             
@@ -113,10 +117,12 @@ function search_aliases() {
     
     local found=0
     for module_file in "${AK_ROOT}/modules/"*.sh; do
-        local module_name=$(basename "$module_file" | sed -E 's/^[0-9]+_//' | sed 's/\.sh$//')
+        local module_name
+        module_name=$(basename "$module_file" | sed -E 's/^[0-9]+_//' | sed 's/\.sh$//')
         
         # We need to extract blocks of alias info.
-        local results=$(awk -v term="$term" '
+        local results
+        results=$(awk -v term="$term" '
             /^## / { 
                 cmd = substr($0, 4)
                 getline
@@ -167,6 +173,7 @@ case "$COMMAND" in
         show_modules
         ;;
     reload)
+        # shellcheck source=/dev/null
         source ~/.bashrc
         print_color "green" "✔ Aliaskit reloaded directly."
         ;;

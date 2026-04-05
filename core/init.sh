@@ -2,7 +2,8 @@
 
 # core/init.sh - Initializes aliaskit, loads configs, and sources enabled modules
 
-export AK_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+AK_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+export AK_ROOT
 export AK_CONFIG="${HOME}/.aliaskit.conf"
 
 # Copy default config if it doesn't exist
@@ -15,6 +16,7 @@ fi
 
 # Load configs
 if [[ -f "$AK_CONFIG" ]]; then
+    # shellcheck source=/dev/null
     source "$AK_CONFIG"
 fi
 
@@ -26,6 +28,7 @@ for module_file in "${AK_ROOT}/modules/"*.sh; do
         
         # Check if module is enabled (defaults to true if not explicitly set to false)
         if [[ "${!var_name}" != "false" ]]; then
+            # shellcheck source=/dev/null
             source "$module_file"
         fi
     fi
