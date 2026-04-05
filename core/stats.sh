@@ -15,7 +15,7 @@ function print_color() {
     esac
 }
 
-REPO="maruf-pfc/aliaskit" # the user's Github repo
+REPO="blackstart-labs/aliaskit" # the user's Github repo
 
 print_color "cyan" "📊 Aliaskit Community Stats"
 echo "Fetching live data from GitHub ($REPO)..."

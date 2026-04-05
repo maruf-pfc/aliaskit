@@ -1,0 +1,33 @@
+name: Shellcheck CI
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  shellcheck:
+    name: Lint Bash Scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Run ShellCheck on Modules
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: './modules'
+          severity: warning
+
+      - name: Run ShellCheck on Core
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: './core'
+          severity: warning
+
+      - name: Run ShellCheck on Root Scripts
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: '.'
+          ignore_names: 'README.md CONTRIBUTING.md'
+          severity: warning

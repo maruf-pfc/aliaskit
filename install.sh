@@ -4,7 +4,7 @@
 
 set -e
 
-REPO_URL="https://github.com/maruf-pfc/aliaskit.git"
+REPO_URL="https://github.com/blackstart-labs/aliaskit.git"
 INSTALL_DIR="${HOME}/.aliaskit"
 BASHRC="${HOME}/.bashrc"
 SOURCE_LINE="source ${INSTALL_DIR}/core/init.sh"
