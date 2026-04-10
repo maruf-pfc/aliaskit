@@ -56,8 +56,10 @@ ak() {
     shift
 
     case "$cmd" in
-        help|search|list|modules|config|update|reload|stats|version|--version|-v)
-            if [[ "$cmd" == "version" || "$cmd" == "--version" || "$cmd" == "-v" ]]; then
+        help|search|list|modules|config|update|reload|stats|version|tui|--version|-v)
+            if [[ "$cmd" == "tui" ]]; then
+                bash "${AK_ROOT}/core/help_tui.sh"
+            elif [[ "$cmd" == "version" || "$cmd" == "--version" || "$cmd" == "-v" ]]; then
                 bash "${AK_ROOT}/core/help.sh" "version"
             elif [[ -f "${AK_ROOT}/core/${cmd}.sh" ]]; then
                 bash "${AK_ROOT}/core/${cmd}.sh" "$@"

@@ -5,7 +5,7 @@
 
 set -e
 
-REPO_URL="https://github.com/blackstart-labs/aliaskit.git"
+REPO_URL="https://github.com/arifinsiddiqzisan/aliaskit-tui.git"
 INSTALL_DIR="${HOME}/.aliaskit"
 SOURCE_LINE="source ${INSTALL_DIR}/core/init.sh"
 

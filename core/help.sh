@@ -33,7 +33,8 @@ function show_main_help() {
     echo "  ak <command> [args]"
     echo ""
     print_color "bold" "Commands:"
-    echo "  ak help                - Show this help message"
+    echo "  ak help                - Show interactive TUI (requires fzf)"
+    echo "  ak tui                 - Same as ak help (interactive TUI)"
     echo "  ak help <module>       - Show aliases for a specific module"
     echo "  ak search <term>       - Search aliases for a keyword"
     echo "  ak list <module>       - List all aliases in a module"
@@ -42,11 +43,11 @@ function show_main_help() {
     echo "  ak reload              - Reload aliaskit configuration"
     echo "  ak stats               - Show community stats"
     echo ""
-    
+
     echo "Modules:"
     show_modules
-    
-    print_color "yellow" "💡 Tip: Type 'ak help <module>' to see specific commands."
+
+    print_color "yellow" "💡 Tip: Type 'ak help' to launch the interactive TUI!"
 }
 
 function show_modules() {
@@ -160,6 +161,13 @@ case "$COMMAND" in
     help|list|"")
         if [[ -n "$SUBCMD" ]]; then
             show_module_help "$SUBCMD"
+        elif [[ "$COMMAND" == "help" ]] && [[ -z "$SUBCMD" ]]; then
+            # Default: show TUI if fzf is available, otherwise show text help
+            if command -v fzf &>/dev/null; then
+                bash "${AK_ROOT}/core/help_tui.sh"
+            else
+                show_main_help
+            fi
         else
             show_main_help
         fi
