@@ -33,7 +33,7 @@ function show_main_help() {
     echo "  ak <command> [args]"
     echo ""
     print_color "bold" "Commands:"
-    echo "  ak help                - Show this help message"
+    echo "  ak help                - Open interactive help explorer (fzf)"
     echo "  ak help <module>       - Show aliases for a specific module"
     echo "  ak search <term>       - Search aliases for a keyword"
     echo "  ak list <module>       - List all aliases in a module"
@@ -61,44 +61,129 @@ function show_modules() {
     done
 }
 
-function show_module_help() {
+function get_module_file_by_name() {
     local target_module="$1"
-    local found=0
-    
     for module_file in "${AK_ROOT}/modules/"*.sh; do
+        [[ -f "$module_file" ]] || continue
         local module_name
         module_name=$(basename "$module_file" | sed -E 's/^[0-9]+_//' | sed 's/\.sh$//')
         if [[ "$module_name" == "$target_module" ]]; then
-            found=1
-            local category
-            category=$(grep -m 1 "# CATEGORY:" "$module_file" | sed 's/# CATEGORY: //')
-            print_color "cyan" "📦 Module: $module_name ($category)"
-            echo "---------------------------------------------------"
-            
-            # Parse comments
-            # Format: 
-            # ## alias_name
-            # # @desc Description
-            # # @usage Usage
-            # alias...
-            
-            awk '
-                /^## / { 
-                    cmd = substr($0, 4)
-                    getline
-                    desc = ""
-                    if ($1 == "#" && $2 == "@desc") {
-                        sub(/^# @desc */, "", $0)
-                        desc = $0
-                    }
-                    printf "\033[32m  %-18s\033[0m %s\n", cmd, desc
-                }
-            ' "$module_file"
-            break
+            echo "$module_file"
+            return 0
         fi
     done
-    
-    if [[ $found -eq 0 ]]; then
+    return 1
+}
+
+function render_module_preview_from_file() {
+    local module_file="$1"
+
+    if [[ ! -f "$module_file" ]]; then
+        print_color "red" "Module file not found: $module_file"
+        return
+    fi
+
+    local module_name category
+    module_name=$(basename "$module_file" | sed -E 's/^[0-9]+_//' | sed 's/\.sh$//')
+    category=$(grep -m 1 "# CATEGORY:" "$module_file" | sed 's/# CATEGORY: //')
+
+    print_color "cyan" "📦 Module: $module_name"
+    echo "Category: ${category:-Uncategorized}"
+    echo "---------------------------------------------------"
+
+    awk '
+        function flush_entry() {
+            if (cmd == "") return
+            found = 1
+            printf "\033[32m%s\033[0m\n", cmd
+            if (desc != "") printf "  desc: %s\n", desc
+            if (usage != "") printf "  usage: %s\n", usage
+            if (example != "") printf "  ex: %s\n", example
+            printf "\n"
+        }
+
+        BEGIN {
+            cmd = desc = usage = example = ""
+            found = 0
+        }
+
+        /^## / {
+            flush_entry()
+            cmd = substr($0, 4)
+            desc = usage = example = ""
+            next
+        }
+
+        /^# @desc/ {
+            line = $0
+            sub(/^# @desc[[:space:]]*/, "", line)
+            desc = line
+            next
+        }
+
+        /^# @usage/ {
+            line = $0
+            sub(/^# @usage[[:space:]]*/, "", line)
+            usage = line
+            next
+        }
+
+        /^# @example/ {
+            line = $0
+            sub(/^# @example[[:space:]]*/, "", line)
+            example = line
+            next
+        }
+
+        END {
+            flush_entry()
+            if (!found) {
+                print "No command metadata found in this module."
+            }
+        }
+    ' "$module_file"
+}
+
+function show_help_tui() {
+    if ! command -v fzf >/dev/null 2>&1; then
+        print_color "yellow" "fzf is not installed. Falling back to classic help view."
+        show_main_help
+        return
+    fi
+
+    local module_rows
+    module_rows=$(for module_file in "${AK_ROOT}/modules/"*.sh; do
+        [[ -f "$module_file" ]] || continue
+        module_name=$(basename "$module_file" | sed -E 's/^[0-9]+_//' | sed 's/\.sh$//')
+        printf "%s\n" "$module_name"
+    done)
+
+    if [[ -z "$module_rows" ]]; then
+        print_color "red" "No modules found in ${AK_ROOT}/modules"
+        return
+    fi
+
+    local selection selected_module
+    selection=$(printf "%s\n" "$module_rows" | \
+        fzf --ansi \
+            --height=90% \
+            --layout=reverse \
+            --border \
+            --prompt='Module > ' \
+            --preview-window='right:65%:wrap' \
+            --preview "bash '${AK_ROOT}/core/help.sh' '__preview_module' {}") || return
+
+    selected_module="$selection"
+    [[ -n "$selected_module" ]] && show_module_help "$selected_module"
+}
+
+function show_module_help() {
+    local target_module="$1"
+    local module_file
+
+    if module_file=$(get_module_file_by_name "$target_module"); then
+        render_module_preview_from_file "$module_file"
+    else
         print_color "red" "Module not found: $target_module"
         echo "Use 'ak modules' to see available modules."
     fi
@@ -157,9 +242,21 @@ function search_aliases() {
 }
 
 case "$COMMAND" in
+    __preview_module)
+        if [[ -n "$SUBCMD" ]]; then
+            preview_module_file=$(get_module_file_by_name "$SUBCMD")
+            if [[ -n "$preview_module_file" ]]; then
+                render_module_preview_from_file "$preview_module_file"
+            else
+                print_color "red" "Module not found: $SUBCMD"
+            fi
+        fi
+        ;;
     help|list|"")
         if [[ -n "$SUBCMD" ]]; then
             show_module_help "$SUBCMD"
+        elif [[ -t 0 && -t 1 ]]; then
+            show_help_tui
         else
             show_main_help
         fi

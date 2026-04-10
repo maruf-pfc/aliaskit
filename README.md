@@ -42,7 +42,7 @@ Once installed, reload your terminal or run `source ~/.bashrc`.
 
 ## Usage
 The central command is `ak`.
-- `ak help` -> Show all modules and general commands.
+- `ak help` -> Open interactive module explorer (fzf) with live preview.
 - `ak help git` -> Show all commands available in the Git module.
 - `ak search logs` -> Search for the word 'logs' across all descriptions and commands.
 - `ak stats` -> Check out how many stars and forks the project has!
