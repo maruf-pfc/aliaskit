@@ -57,3 +57,13 @@ AK_ENABLE_GIT=false # disable git aliases
 
 ## Community
 Star us on GitHub and use `ak stats` to see where we're at!
+
+## Star History
+
+<a href="https://www.star-history.com/?repos=blackstart-labs%2Faliaskit&type=timeline&legend=bottom-right">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=blackstart-labs/aliaskit&type=timeline&theme=dark&legend=bottom-right" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=blackstart-labs/aliaskit&type=timeline&legend=bottom-right" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=blackstart-labs/aliaskit&type=timeline&legend=bottom-right" />
+ </picture>
+</a>
