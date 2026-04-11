@@ -40,6 +40,9 @@ source ~/.zprofile # macOS
 | `ak search <term>` | Search all aliases by keyword |
 | `ak modules` | List all available modules |
 | `ak update` | Pull the latest version |
+| `ak add` | Create a custom module (wizard mode) |
+| `ak edit` | Edit or delete custom modules |
+| `ak custom` | View custom module/command status |
 | `ak stats` | Show GitHub community statistics |
 | `ak version` | Show current version |
 

@@ -6,6 +6,12 @@ AK_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 COMMAND="${1:-}"
 SUBCMD="${2:-}"
 
+if [[ -f "${AK_ROOT}/core/registry.sh" ]]; then
+    # shellcheck source=/dev/null
+    source "${AK_ROOT}/core/registry.sh"
+    ak_registry_bootstrap
+fi
+
 # Usage:
 # ak help -> list categories
 # ak help module_name -> list commands in category
@@ -40,6 +46,9 @@ function show_main_help() {
     echo "  ak modules             - List all available modules"
     echo "  ak update              - Check and install updates"
     echo "  ak reload              - Reload aliaskit configuration"
+    echo "  ak add                 - Create a custom module via wizard"
+    echo "  ak edit                - Edit/delete custom modules"
+    echo "  ak custom              - Show custom module status list"
     echo "  ak stats               - Show community stats"
     echo ""
     
@@ -49,21 +58,46 @@ function show_main_help() {
     print_color "yellow" "💡 Tip: Type 'ak help <module>' to see specific commands."
 }
 
-function show_modules() {
+function iter_all_module_files() {
+    local module_file
     for module_file in "${AK_ROOT}/modules/"*.sh; do
-        if [[ -f "$module_file" ]]; then
-            local category
-            category=$(grep -m 1 "# CATEGORY:" "$module_file" | sed 's/# CATEGORY: //')
-            local module_name
-            module_name=$(basename "$module_file" | sed -E 's/^[0-9]+_//' | sed 's/\.sh$//')
-            printf "  %-15s - %s\n" "$module_name" "${category:-Uncategorized}"
-        fi
+        [[ -f "$module_file" ]] || continue
+        echo "$module_file"
+    done
+    for module_file in "${AK_ROOT}/custom/modules/"*.sh; do
+        [[ -f "$module_file" ]] || continue
+        echo "$module_file"
+    done
+}
+
+function show_modules() {
+    local module_file category module_name
+    for module_file in "${AK_ROOT}/modules/"*.sh; do
+        [[ -f "$module_file" ]] || continue
+        category=$(grep -m 1 "# CATEGORY:" "$module_file" | sed 's/# CATEGORY: //')
+        module_name=$(basename "$module_file" | sed -E 's/^[0-9]+_//' | sed 's/\.sh$//')
+        printf "  %-15s - %s\n" "$module_name" "${category:-Uncategorized}"
+    done
+    for module_file in "${AK_ROOT}/custom/modules/"*.sh; do
+        [[ -f "$module_file" ]] || continue
+        category=$(grep -m 1 "# CATEGORY:" "$module_file" | sed 's/# CATEGORY: //')
+        module_name=$(basename "$module_file" | sed -E 's/^[0-9]+_//' | sed 's/\.sh$//')
+        printf "  %-15s - %s [custom]\n" "$module_name" "${category:-Uncategorized}"
     done
 }
 
 function get_module_file_by_name() {
     local target_module="$1"
     for module_file in "${AK_ROOT}/modules/"*.sh; do
+        [[ -f "$module_file" ]] || continue
+        local module_name
+        module_name=$(basename "$module_file" | sed -E 's/^[0-9]+_//' | sed 's/\.sh$//')
+        if [[ "$module_name" == "$target_module" ]]; then
+            echo "$module_file"
+            return 0
+        fi
+    done
+    for module_file in "${AK_ROOT}/custom/modules/"*.sh; do
         [[ -f "$module_file" ]] || continue
         local module_name
         module_name=$(basename "$module_file" | sed -E 's/^[0-9]+_//' | sed 's/\.sh$//')
@@ -152,11 +186,10 @@ function show_help_tui() {
     fi
 
     local module_rows
-    module_rows=$(for module_file in "${AK_ROOT}/modules/"*.sh; do
-        [[ -f "$module_file" ]] || continue
+    module_rows=$(iter_all_module_files | while IFS= read -r module_file; do
         module_name=$(basename "$module_file" | sed -E 's/^[0-9]+_//' | sed 's/\.sh$//')
         printf "%s\n" "$module_name"
-    done)
+    done | awk '!seen[$0]++')
 
     if [[ -z "$module_rows" ]]; then
         print_color "red" "No modules found in ${AK_ROOT}/modules"
@@ -201,7 +234,8 @@ function search_aliases() {
     echo "---------------------------------------------------"
     
     local found=0
-    for module_file in "${AK_ROOT}/modules/"*.sh; do
+    for module_file in "${AK_ROOT}/modules/"*.sh "${AK_ROOT}/custom/modules/"*.sh; do
+        [[ -f "$module_file" ]] || continue
         local module_name
         module_name=$(basename "$module_file" | sed -E 's/^[0-9]+_//' | sed 's/\.sh$//')
         
@@ -273,6 +307,15 @@ case "$COMMAND" in
         # shellcheck source=/dev/null
         source ~/.bashrc
         print_color "green" "✔ Aliaskit reloaded directly."
+        ;;
+    add)
+        bash "${AK_ROOT}/core/add.sh" "$SUBCMD"
+        ;;
+    edit)
+        bash "${AK_ROOT}/core/edit.sh" "$SUBCMD"
+        ;;
+    custom)
+        bash "${AK_ROOT}/core/custom.sh"
         ;;
     update)
         bash "${AK_ROOT}/update.sh" "$SUBCMD"

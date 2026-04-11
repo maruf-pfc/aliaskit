@@ -47,6 +47,9 @@ The central command is `ak`.
 - `ak search logs` -> Search for the word 'logs' across all descriptions and commands.
 - `ak stats` -> Check out how many stars and forks the project has!
 - `ak update` -> Update Aliaskit manually.
+- `ak add` -> Launch custom module wizard (module + commands + desc/usage/example).
+- `ak edit` -> Edit/delete your custom modules and commands.
+- `ak custom` -> Show custom module statuses (including official conflicts).
 
 ## Configuration
 Aliaskit generates a `.aliaskit.conf` file in your home directory. Open it to toggle individual modules on or off:

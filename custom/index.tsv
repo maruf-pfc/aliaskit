@@ -1,0 +1,3 @@
+type	module	item	genuine	status	desc	usage	example	path
+module	muskareem	redirect to muskareem folder	-	active	-	-	-	/home/zisan/Downloads/aliaskit-tui/custom/modules/90_muskareem.sh
+command	muskareem	muskareem	cd /home/zisan/Downloads/Muskareem/	active	redirect user to muskareem folder	muskareem	muskareem	/home/zisan/Downloads/aliaskit-tui/custom/modules/90_muskareem.sh
