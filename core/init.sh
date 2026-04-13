@@ -36,6 +36,13 @@ if [[ -f "$AK_CONFIG" ]]; then
     source "$AK_CONFIG"
 fi
 
+# Registry / custom module helpers
+if [[ -f "${AK_ROOT}/core/registry.sh" ]]; then
+    # shellcheck source=/dev/null
+    source "${AK_ROOT}/core/registry.sh"
+    ak_registry_bootstrap
+fi
+
 # Source enabled modules
 for module_file in "${AK_ROOT}/modules/"*.sh; do
     if [[ -f "$module_file" ]]; then
@@ -50,13 +57,18 @@ for module_file in "${AK_ROOT}/modules/"*.sh; do
     fi
 done
 
+# Source custom modules (keeps official priority on conflicts)
+if declare -f ak_source_custom_modules_with_conflict_guard >/dev/null 2>&1; then
+    ak_source_custom_modules_with_conflict_guard
+fi
+
 # The root `ak` command router
 ak() {
     local cmd="${1:-help}"
     shift
 
     case "$cmd" in
-        help|search|list|modules|config|update|reload|stats|version|--version|-v)
+        help|search|list|modules|config|update|reload|stats|version|--version|-v|add|edit|custom)
             if [[ "$cmd" == "version" || "$cmd" == "--version" || "$cmd" == "-v" ]]; then
                 bash "${AK_ROOT}/core/help.sh" "version"
             elif [[ -f "${AK_ROOT}/core/${cmd}.sh" ]]; then
